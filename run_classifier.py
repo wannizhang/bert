@@ -165,12 +165,12 @@ class InputFeatures(object):
                input_ids,
                input_mask,
                segment_ids,
-               label_id,
+               label_ids,
                is_real_example=True):
     self.input_ids = input_ids
     self.input_mask = input_mask
     self.segment_ids = segment_ids
-    self.label_ids = label_id
+    self.label_ids = label_ids
     self.is_real_example = is_real_example
 
 
@@ -383,7 +383,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         input_ids=[0] * max_seq_length,
         input_mask=[0] * max_seq_length,
         segment_ids=[0] * max_seq_length,
-        label_id=0,
+        label_ids=[0],
         is_real_example=False)
 
 
@@ -473,7 +473,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
       input_ids=input_ids,
       input_mask=input_mask,
       segment_ids=segment_ids,
-      label_id=label_ids,
+      label_ids=label_ids,
       is_real_example=True)
   return feature
 
@@ -499,7 +499,7 @@ def file_based_convert_examples_to_features(
     features["input_ids"] = create_int_feature(feature.input_ids)
     features["input_mask"] = create_int_feature(feature.input_mask)
     features["segment_ids"] = create_int_feature(feature.segment_ids)
-    features["label_ids"] = create_int_feature([feature.label_id])
+    features["label_ids"] = create_int_feature([feature.label_ids])
     features["is_real_example"] = create_int_feature(
         [int(feature.is_real_example)])
 
