@@ -170,7 +170,7 @@ class InputFeatures(object):
     self.input_ids = input_ids
     self.input_mask = input_mask
     self.segment_ids = segment_ids
-    self.label_id = label_id
+    self.label_ids = label_id
     self.is_real_example = is_real_example
 
 
@@ -456,7 +456,12 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
   assert len(input_mask) == max_seq_length
   assert len(segment_ids) == max_seq_length
 
-  label_id = label_map[example.label]
+  try:
+    label_ids = [int(l) for l in example.label]
+  except TypeError:
+    label_ids = [int(example.label)]
+
+
   if ex_index < 5:
     tf.logging.info("*** Example ***")
     tf.logging.info("guid: %s" % (example.guid))
@@ -471,7 +476,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
       input_ids=input_ids,
       input_mask=input_mask,
       segment_ids=segment_ids,
-      label_id=label_id,
+      label_id=label_ids,
       is_real_example=True)
   return feature
 
@@ -605,12 +610,11 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
 
     logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
-    probabilities = tf.nn.softmax(logits, axis=-1)
-    log_probs = tf.nn.log_softmax(logits, axis=-1)
+    probabilities = tf.nn.sigmoid(logits)
 
-    one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
+    labels = tf.cast(labels, tf.float32)
 
-    per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
+    per_example_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
     loss = tf.reduce_mean(per_example_loss)
 
     return (loss, per_example_loss, logits, probabilities)
@@ -722,7 +726,7 @@ def input_fn_builder(features, seq_length, is_training, drop_remainder):
     all_input_ids.append(feature.input_ids)
     all_input_mask.append(feature.input_mask)
     all_segment_ids.append(feature.segment_ids)
-    all_label_ids.append(feature.label_id)
+    all_label_ids.append(feature.label_ids)
 
   def input_fn(params):
     """The actual input function."""
