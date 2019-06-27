@@ -725,6 +725,8 @@ def input_fn_builder(features, seq_length, is_training, drop_remainder):
     all_segment_ids.append(feature.segment_ids)
     all_label_ids.append(feature.label_ids)
 
+  num_labels = len(features[0].lable_ids)
+
   def input_fn(params):
     """The actual input function."""
     batch_size = params["batch_size"]
@@ -750,7 +752,10 @@ def input_fn_builder(features, seq_length, is_training, drop_remainder):
                 shape=[num_examples, seq_length],
                 dtype=tf.int32),
         "label_ids":
-            tf.constant(all_label_ids, shape=[num_examples], dtype=tf.int32),
+            tf.constant(
+              all_label_ids, 
+              shape=[num_examples, num_labels], 
+              dtype=tf.int32),
     })
 
     if is_training:
