@@ -121,9 +121,9 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         correct_prediction = tf.equal(label_ids, tf.cast(tf.round(tf.nn.sigmoid(logits)), label_ids.dtype))
         row_num, col_num = correct_prediction.shape[0].value, correct_prediction.shape[1].value
         accuracy_me = tf.metrics.mean(tf.slice(correct_prediction, [0,0], [row_num, 1]))
-        accuracy_el = tf.metrics.mean(tf.slice(correct_prediction, [0,1], [row_num, 2]))
-        accuracy_pl = tf.metrics.mean(tf.slice(correct_prediction, [0,2], [row_num, 3]))
-        accuracy_bu = tf.metrics.mean(tf.slice(correct_prediction, [0,3], [row_num, 4]))
+        accuracy_el = tf.metrics.mean(tf.slice(correct_prediction, [0,1], [row_num, 1]))
+        accuracy_pl = tf.metrics.mean(tf.slice(correct_prediction, [0,2], [row_num, 1]))
+        accuracy_bu = tf.metrics.mean(tf.slice(correct_prediction, [0,3], [row_num, 1]))
         # accuracy = tf.metrics.accuracy(label_ids, tf.round(tf.nn.sigmoid(logits)))
         loss = tf.metrics.mean(values=per_example_loss)
         return {
