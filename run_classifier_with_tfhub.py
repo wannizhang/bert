@@ -118,8 +118,9 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
       def metric_fn(per_example_loss, label_ids, logits):
         predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
-        # accuracy = tf.equal(label_ids, tf.round(tf.nn.sigmoid(logits)))
-        accuracy = tf.metrics.accuracy(label_ids, tf.round(tf.nn.sigmoid(logits)))
+        correct_prediction = tf.equal(tf.round(label_ids), tf.round(tf.nn.sigmoid(logits)))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), axis=0)
+        # accuracy = tf.metrics.accuracy(label_ids, tf.round(tf.nn.sigmoid(logits)))
         loss = tf.metrics.mean(per_example_loss)
         return {
             "eval_accuracy": accuracy,
