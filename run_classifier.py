@@ -684,13 +684,20 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
       def metric_fn(per_example_loss, label_ids, logits, is_real_example):
         # predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
-        correct_prediction = tf.math.equal(label_ids, tf.cast(tf.round(tf.nn.sigmoid(logits)), label_ids.dtype))
-        accuracy = tf.math.reduce_mean(tf.cast(correct_prediction, tf.float32), 0)
+        correct_prediction = tf.equal(label_ids, tf.cast(tf.round(tf.nn.sigmoid(logits)), label_ids.dtype))
+        row_num, col_num = correct_prediction.shape[0].value, correct_prediction.shape[1].value
+        accuracy_me = tf.metrics.mean(tf.slice(correct_prediction, [0,0], [row_num, 1]))
+        accuracy_el = tf.metrics.mean(tf.slice(correct_prediction, [0,1], [row_num, 2]))
+        accuracy_pl = tf.metrics.mean(tf.slice(correct_prediction, [0,2], [row_num, 3]))
+        accuracy_bu = tf.metrics.mean(tf.slice(correct_prediction, [0,3], [row_num, 4]))
         # accuracy = tf.metrics.accuracy(
         #     labels=label_ids, predictions=tf.round(tf.nn.sigmoid(logits)), weights=is_real_example)
         loss = tf.metrics.mean(values=per_example_loss, weights=is_real_example)
         return {
-            "eval_accuracy": accuracy,
+            "eval_accuracy_me": accuracy_me,
+            "eval_accuracy_el": accuracy_el,
+            "eval_accuracy_pl": accuracy_pl,
+            "eval_accuracy_bu": accuracy_bu,
             "eval_loss": loss,
         }
 
